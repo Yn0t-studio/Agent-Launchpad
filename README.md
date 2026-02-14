@@ -12,7 +12,8 @@ Use this as a starting point to build your own custom AI personas and agents.
 - 🏗️ **Template Structure**: Clean, modular code ready for customization.
 - 💬 **Interactive UI**: Polished chat interface out-of-the-box.
 - � **Agentic Core**: Powered by `deepagents` (based on LangGraph).
-- 🔒 **100% Local**: Privacy-first using Llama 3.1 via Ollama.
+- � **Telemetry Ready**: Integrated with **[Langfuse](https://langfuse.com/)** for observability.
+- �🔒 **100% Local**: Privacy-first using Llama 3.1 via Ollama.
 
 ## Prerequisites
 
@@ -64,6 +65,21 @@ ollama serve
 3.  Open `http://localhost:8000` to chat.
 
 ## Configuration
+
+### Telemetry (Langfuse)
+
+To enable tracing and observability with **[Langfuse](https://langfuse.com/)**:
+
+1.  Create a `.env` file in the root directory.
+2.  Add your Langfuse keys:
+
+    ```bash
+    LANGFUSE_PUBLIC_KEY=pk-lf-...
+    LANGFUSE_SECRET_KEY=sk-lf-...
+    LANGFUSE_HOST=https://cloud.langfuse.com # or your self-hosted instance
+    ```
+
+3.  Restart the application. Telemetry will automatically be enabled if keys are present.
 
 ### Changing the Model or Tools
 
