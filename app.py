@@ -32,6 +32,7 @@ async def on_chat_start():
     agent = get_agent()
     cl.user_session.set("agent", agent)
     cl.user_session.set("history", [])
+    cl.user_session.set("telemetry_handler", get_langfuse_callback())
 
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -49,10 +50,12 @@ async def on_message(message: cl.Message):
     input_messages = history + [HumanMessage(content=message.content)]
     
     # Prepare config with telemetry if available
-    telemetry_handler = get_langfuse_callback()
-    config = {}
-    if telemetry_handler:
-        config["callbacks"] = [telemetry_handler]
+    # Create the config with the callback
+    # If handler is None, LangChain simply ignores it.
+    config = {"callbacks": [cl.user_session.get("telemetry_handler")] if cl.user_session.get("telemetry_handler") else []}
+    
+    # Log config
+    print("Config:", config)    
 
     # Use astream_events to capture tokens from the model
     async for event in agent.astream_events({"messages": input_messages}, config=config, version="v2"):

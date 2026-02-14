@@ -11,10 +11,9 @@ def get_langfuse_callback():
     host = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
 
     if public_key and secret_key:
+        # Finds the public key in the environment variables
+        # and returns a Langfuse callback handler.
         return CallbackHandler(
-            public_key=public_key,
-            secret_key=secret_key,
-            host=host
         )
     
     print("⚠️ Langfuse keys not found. Tracing is disabled.")
