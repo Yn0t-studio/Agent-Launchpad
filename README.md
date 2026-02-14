@@ -1,14 +1,18 @@
-# AI Persona
+# Agent Launchpad Template
 
-A local AI chat interface built with [Chainlit](https://github.com/Chainlit/chainlit), [LangChain](https://github.com/langchain-ai/langchain), [Ollama](https://ollama.com/), and [Deep Agents](https://github.com/deep-agents/deep-agents).
+🚀 **Get up and running with a local conversational agent in minutes.**
+
+This project is a minimal, deep-agentic template designed for experimenting with local LLMs. It combines **[Chainlit](https://github.com/Chainlit/chainlit)** for the chat interface, **[Ollama](https://ollama.com/)** for local model inference, and **[Deep Agents](https://github.com/deep-agents/deep-agents)** for agentic capabilities.
+
+Use this as a starting point to build your own custom AI personas and agents.
 
 ## Features
 
-- 💬 **Interactive Chat**: Clean, modern chat interface provided by Chainlit.
-- 🤖 **Deep Agent**: Powered by `deepagents` for advanced agentic capabilities.
-- 🔒 **Local Privacy**: Runs entirely locally using Ollama and Llama 3.1.
-- 📝 **Context Aware**: Maintains conversation history.
-- ⚡ **Streaming**: Real-time token streaming.
+- ⚡ **Instant Setup**: Clone, install, and chat.
+- 🏗️ **Template Structure**: Clean, modular code ready for customization.
+- 💬 **Interactive UI**: Polished chat interface out-of-the-box.
+- � **Agentic Core**: Powered by `deepagents` (based on LangGraph).
+- 🔒 **100% Local**: Privacy-first using Llama 3.1 via Ollama.
 
 ## Prerequisites
 
@@ -33,8 +37,8 @@ ollama serve
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/Yn0t-studio/AI-Persona.git
-    cd AI-Persona
+    git clone https://github.com/Yn0t-studio/Agent-Launchpad.git
+    cd Agent-Launchpad
     ```
 
 2.  Create and activate a virtual environment:
