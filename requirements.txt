@@ -2,3 +2,5 @@ langchain
 langchain-community
 ollama
 chainlit
+deepagents
+langchain-ollama
