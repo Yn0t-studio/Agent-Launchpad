@@ -3,6 +3,19 @@ from langchain_core.messages import HumanMessage, AIMessage
 import urllib.request
 from agent import get_agent
 
+# Patch engineio to allow more packets (fixes 'Too many packets in payload' error)
+try:
+    from engineio.payload import Payload
+    Payload.max_decode_packets = 500
+except ImportError:
+    pass
+
+try:
+    from telemetry import get_langfuse_callback
+except ImportError:
+    def get_langfuse_callback():
+        return None
+
 def check_ollama_connection():
     try:
         urllib.request.urlopen("http://localhost:11434")
@@ -35,8 +48,14 @@ async def on_message(message: cl.Message):
     # The state schema likely expects 'messages'
     input_messages = history + [HumanMessage(content=message.content)]
     
+    # Prepare config with telemetry if available
+    telemetry_handler = get_langfuse_callback()
+    config = {}
+    if telemetry_handler:
+        config["callbacks"] = [telemetry_handler]
+
     # Use astream_events to capture tokens from the model
-    async for event in agent.astream_events({"messages": input_messages}, version="v2"):
+    async for event in agent.astream_events({"messages": input_messages}, config=config, version="v2"):
         kind = event["event"]
         
         # Stream tokens from the chat model

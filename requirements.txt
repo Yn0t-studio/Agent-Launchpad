@@ -4,3 +4,4 @@ ollama
 chainlit
 deepagents
 langchain-ollama
+langfuse
