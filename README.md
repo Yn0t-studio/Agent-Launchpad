@@ -1,30 +1,29 @@
 # AI Persona
 
-A simple, local AI chat interface built with [Chainlit](https://github.com/Chainlit/chainlit), [LangChain](https://github.com/langchain-ai/langchain), and [Ollama](https://ollama.com/).
+A local AI chat interface built with [Chainlit](https://github.com/Chainlit/chainlit), [LangChain](https://github.com/langchain-ai/langchain), [Ollama](https://ollama.com/), and [Deep Agents](https://github.com/deep-agents/deep-agents).
 
 ## Features
 
 - 💬 **Interactive Chat**: Clean, modern chat interface provided by Chainlit.
-- 🔒 **Local Privacy**: Runs entirely locally using Ollama and Llama 3.
-- 📝 **Context Aware**: Maintains conversation history for context-aware responses.
-- ⚡ **Streaming**: Real-time token streaming for faster response perception.
+- 🤖 **Deep Agent**: Powered by `deepagents` for advanced agentic capabilities.
+- 🔒 **Local Privacy**: Runs entirely locally using Ollama and Llama 3.1.
+- 📝 **Context Aware**: Maintains conversation history.
+- ⚡ **Streaming**: Real-time token streaming.
 
 ## Prerequisites
-
-Before running the application, ensure you have the following installed:
 
 1.  **Python 3.10 or higher**
 2.  **[Ollama](https://ollama.com/)** running locally.
 
 ### Setup Ollama
 
-Install Ollama and pull the Llama 3 model (or your preferred model):
+Install Ollama and pull the Llama 3.1 model:
 
 ```bash
-ollama pull llama3
+ollama pull llama3.1
 ```
 
-Make sure the Ollama server is running:
+Start the Ollama server:
 
 ```bash
 ollama serve
@@ -38,10 +37,10 @@ ollama serve
     cd AI-Persona
     ```
 
-2.  Create and activate a virtual environment (recommended):
+2.  Create and activate a virtual environment:
     ```bash
     python -m venv .venv
-    source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+    source .venv/bin/activate  # Windows: .venv\Scripts\activate
     ```
 
 3.  Install dependencies:
@@ -51,23 +50,28 @@ ollama serve
 
 ## Usage
 
-1.  Ensure Ollama is running in a separate terminal:
-    ```bash
-    ollama serve
-    ```
+1.  Ensure Ollama is running (`ollama serve`).
 
-2.  Run the Chainlit application:
+2.  Run the application:
     ```bash
     chainlit run app.py -w
     ```
-    *(The `-w` flag enables auto-reloading during development)*
 
-3.  Open your browser to `http://localhost:8000` to start chatting!
+3.  Open `http://localhost:8000` to chat.
 
 ## Configuration
 
-To change the model, edit `app.py` and modify the `ChatOllama` initialization:
+### Changing the Model or Tools
+
+Edit `agent.py` to configure the agent:
 
 ```python
-model = ChatOllama(model="llama3", base_url="http://localhost:11434")
+def get_agent():
+    # ...
+    model = ChatOllama(model="llama3.1", base_url="http://localhost:11434")
+    
+    # Add tools or customize the agent here
+    agent = create_deep_agent(model=model, tools=[])
+    
+    return agent
 ```
