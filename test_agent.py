@@ -14,7 +14,7 @@ async def test_agent():
         return
 
     # 2. Prepare Input
-    input_messages = [HumanMessage(content="What is 2 + 2?")]
+    input_messages = [HumanMessage(content="Hello")]
     
     # 3. Stream Events
     print("\n--- Streaming Events ---")
@@ -32,7 +32,7 @@ async def test_agent():
                 node_name = metadata.get("langgraph_node")
                 
                 # Debug print for every chunk
-                # print(f"Node: {node_name}, Content: {repr(content)}")
+                print(f"Node: {node_name}, Content: {repr(content)}")
                 
                 if content:
                     if node_name == "reasoner":

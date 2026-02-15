@@ -24,17 +24,14 @@ def get_agent():
         # System prompt to encourage thinking/planning
         system_prompt = SystemMessage(content="""You are the Reasoning Engine. 
 Your goal is to analyze the user's request and outline a step-by-step plan or thinking process to solve it.
-Do NOT provide the final answer yet. Focus on breaking down the problem, identifying key information, and planning the response.
-Start your response with "Thinking Process:" or similar.""")
+Even for simple greetings like "Hello", you must plan your response (e.g., "1. Acknowledge user. 2. Ask how to help.").
+Do NOT provide the final answer to the user in this step. ONLY provide the internal reasoning/plan.
+Start your response with "Thinking Process:".""")
         
         # We invoke the model with the system prompt + conversation history
-        # We might want to wrap this in a way that distinguishing it as "thought"
-        # For now, we'll just append it. Check app.py for how this is routed.
         response = await model.ainvoke([system_prompt] + messages)
         
-        # We return a message that identifies itself as coming from the reasoner?
-        # LangGraph adds the result to the state.
-        # We can add a custom property or just rely on the node name for routing in stream_events.
+        # We return a message that identifies itself as coming from the reasoner
         return {"messages": [response]}
 
     # Define the Responder Node
@@ -46,9 +43,11 @@ Start your response with "Thinking Process:" or similar.""")
         
         # System prompt for the final response
         system_prompt = SystemMessage(content="""You are the Final Responder.
-Review the user's request and the Reasoning Engine's analysis (the latest message).
-Provide a clear, concise, and helpful final answer to the user.
-Do not repeat the "Thinking Process" explicitly, just use it to inform your answer.""")
+Your job is to generate the final response to the user.
+You will be provided with the user's request and the Reasoning Engine's analysis (the latest message).
+Use the Reasoning Engine's plan to craft your response.
+You MUST provide a response to the user. Do not be silent.
+Do not repeat the "Thinking Process" explicitly. just answer the user directly.""")
         
         response = await model.ainvoke([system_prompt] + messages)
         return {"messages": [response]}
