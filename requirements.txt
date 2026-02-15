@@ -2,6 +2,6 @@ langchain
 langchain-community
 ollama
 chainlit
-deepagents
+langgraph
 langchain-ollama
 langfuse

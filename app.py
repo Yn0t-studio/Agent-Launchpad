@@ -43,33 +43,48 @@ async def on_message(message: cl.Message):
         await cl.Message(content="Ollama is not connected. Please restart the app after starting Ollama.").send()
         return
 
-    msg = cl.Message(content="")
+    # Create the main answer message
+    final_answer = cl.Message(content="")
+    
+    # Create the thinking step
+    thinking_step = cl.Step(name="Thinking Process", type="process")
     
     # Prepare input for the agent (LangGraph state)
-    # The state schema likely expects 'messages'
+    # The state schema expects 'messages'
+    # We append the user message to the history
     input_messages = history + [HumanMessage(content=message.content)]
     
     # Prepare config with telemetry if available
-    # Create the config with the callback
-    # If handler is None, LangChain simply ignores it.
     config = {"callbacks": [cl.user_session.get("telemetry_handler")] if cl.user_session.get("telemetry_handler") else []}
     
-    # Log config
-    print("Config:", config)    
+    # Start the thinking step
+    await thinking_step.stream_token("Thinking...\n") 
 
-    # Use astream_events to capture tokens from the model
+    # Use astream_events to capture tokens and route them
     async for event in agent.astream_events({"messages": input_messages}, config=config, version="v2"):
         kind = event["event"]
         
-        # Stream tokens from the chat model
+        # Check if the event matches the stream output from a chat model
         if kind == "on_chat_model_stream":
             content = event["data"]["chunk"].content
             if content:
-                await msg.stream_token(content)
+                # Check which node produced this event
+                # LangGraph adds metadata including 'langgraph_node'
+                node_name = event.get("metadata", {}).get("langgraph_node")
+                
+                if node_name == "reasoner":
+                    await thinking_step.stream_token(content)
+                elif node_name == "responder":
+                    await final_answer.stream_token(content)
     
-    await msg.send()
+    # Send the final results
+    await thinking_step.send()
+    await final_answer.send()
     
-    # Update history
+    # Update history with the user message and the final answer
+    # We consciously do not add the reasoning trace to the history to keep it clean,
+    # or we could if we wanted the agent to remember its reasoning.
+    # For now, let's keep it simple: User Message -> Final Answer.
     history.append(HumanMessage(content=message.content))
-    history.append(AIMessage(content=msg.content))
+    history.append(AIMessage(content=final_answer.content))
     cl.user_session.set("history", history)
