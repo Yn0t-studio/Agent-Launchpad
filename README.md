@@ -2,7 +2,7 @@
 
 🚀 **Get up and running with a local conversational agent in minutes.**
 
-This project is a minimal, deep-agentic template designed for experimenting with local LLMs. It combines **[Chainlit](https://github.com/Chainlit/chainlit)** for the chat interface, **[Ollama](https://ollama.com/)** for local model inference, and **[Deep Agents](https://github.com/deep-agents/deep-agents)** for agentic capabilities.
+This project is a minimal, deep-agentic template designed for experimenting with local LLMs. It combines **[Chainlit](https://github.com/Chainlit/chainlit)** for the chat interface, **[Ollama](https://ollama.com/)** for local model inference, and **[LangGraph](https://langchain-ai.github.io/langgraph/)** for custom agentic workflows.
 
 Use this as a starting point to build your own custom AI personas and agents.
 
@@ -11,9 +11,10 @@ Use this as a starting point to build your own custom AI personas and agents.
 - ⚡ **Instant Setup**: Clone, install, and chat.
 - 🏗️ **Template Structure**: Clean, modular code ready for customization.
 - 💬 **Interactive UI**: Polished chat interface out-of-the-box.
-- � **Agentic Core**: Powered by `deepagents` (based on LangGraph).
-- � **Telemetry Ready**: Integrated with **[Langfuse](https://langfuse.com/)** for observability.
-- �🔒 **100% Local**: Privacy-first using Llama 3.1 via Ollama.
+- 🧠 **Extended Thinking**: Visualizes the agent's reasoning process using Chainlit steps.
+- 🔗 **Native LangGraph**: Custom graph implementation (Reasoning -> Response) for full control.
+- 📊 **Telemetry Ready**: Integrated with **[Langfuse](https://langfuse.com/)** for observability.
+- 🔒 **100% Local**: Privacy-first using Llama 3.1 via Ollama.
 
 ## Prerequisites
 
@@ -90,8 +91,8 @@ def get_agent():
     # ...
     model = ChatOllama(model="llama3.1", base_url="http://localhost:11434")
     
-    # Add tools or customize the agent here
-    agent = create_deep_agent(model=model, tools=[])
+    # Define custom nodes and workflow
+    # See agent.py for the full graph definition
     
-    return agent
+    return workflow.compile()
 ```
