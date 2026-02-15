@@ -22,11 +22,6 @@ async def on_message(message: cl.Message):
     agent = cl.user_session.get("agent")
     history = cl.user_session.get("history") or []
     
-    # 1. State Tracking
-    final_answer = None   # The main message bubble
-    current_step = None   # The current intermediate step
-    cur_node = None       # Track which node we are currently processing
-
     # Input for the graph
     input_messages = history + [HumanMessage(content=message.content)]
     
@@ -38,7 +33,14 @@ async def on_message(message: cl.Message):
     if langfuse_handler:
         run_config["callbacks"] = [langfuse_handler]
 
-    # 2. Dynamic Event Loop
+    # 1. ALWAYS send the Thinking Step first to reserve the top slot
+    thinking_step = cl.Step(name="Thinking Process")
+    await thinking_step.send()
+
+    # 2. DELAY creating the final message object
+    final_answer = None 
+
+    # 3. Dynamic Event Loop
     async for event in agent.astream_events(
         {"messages": input_messages}, 
         config=run_config,
@@ -50,54 +52,35 @@ async def on_message(message: cl.Message):
         if kind == "on_chat_model_stream":
             
             # Get metadata to know which node is speaking
-            # Fallback to "unknown" if metadata is missing
-            new_node = event.get("metadata", {}).get("langgraph_node", "unknown")
+            node_name = event.get("metadata", {}).get("langgraph_node", "unknown")
             content = event["data"]["chunk"].content
             
             # Skip empty content (keep-alives)
             if not content:
                 continue
 
-            # --- NODE TRANSITION LOGIC ---
-            # If the node has changed, we need to handle the UI transition
-            if new_node != cur_node:
+            # Route content based on the node
+            if node_name == "reasoner":
+                # Stream to the thinking step
+                await thinking_step.stream_token(content)
                 
-                # Close the previous step if it exists
-                if current_step:
-                    await current_step.update()
-                    current_step = None
+            elif node_name == "responder":
+                # This is the final answer
+                if final_answer is None:
+                    # Close the thinking step before starting the answer
+                    await thinking_step.update()
+                    final_answer = cl.Message(content="")
+                    await final_answer.send()
                 
-                cur_node = new_node
-                
-                # Check: Is this new node a "Final Answer" node?
-                if new_node in FINAL_ANSWER_NODES:
-                    # We are now in the final phase.
-                    # Create the final answer message if it doesn't exist yet.
-                    if not final_answer:
-                        final_answer = cl.Message(content="")
-                else:
-                    # It's an intermediate node. Create a new Step for it.
-                    # The name of the step becomes the name of the node (e.g., "web_search")
-                    # You can format this string to look nicer (e.g. .replace("_", " ").title())
-                    step_name = new_node.replace("_", " ").title()
-                    current_step = cl.Step(name=step_name, type="process")
-                    await current_step.send()
-
-            # --- STREAMING LOGIC ---
-            # Route the content to the correct place
-            if current_step:
-                await current_step.stream_token(content)
-            elif final_answer:
                 await final_answer.stream_token(content)
 
-    # 3. Cleanup
-    # Close any dangling steps
-    if current_step:
-        await current_step.update()
+    # 4. Cleanup
+    # Close the thinking step if it hasn't been closed (e.g. if no answer was generated)
+    await thinking_step.update()
     
-    # Send final answer
+    # Send/Update final answer
     if final_answer:
-        await final_answer.send()
+        await final_answer.update() # Ensure the message is marked as done
         # Update History
         history.append(HumanMessage(content=message.content))
         history.append(AIMessage(content=final_answer.content))
