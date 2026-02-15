@@ -1,6 +1,7 @@
 import chainlit as cl
 from langchain_core.messages import HumanMessage, AIMessage
 from agent import get_agent
+from telemetry import get_langfuse_callback
 
 # Define which nodes should emit to the main chat bubble.
 # usually just the final node, but could be a set if you have multiple exit points.
@@ -10,6 +11,11 @@ FINAL_ANSWER_NODES = {"responder"}
 async def on_chat_start():
     agent = get_agent()
     cl.user_session.set("agent", agent)
+
+    # Initialize telemetry
+    langfuse_handler = get_langfuse_callback()
+    if langfuse_handler:
+        cl.user_session.set("langfuse_handler", langfuse_handler)
 
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -24,9 +30,18 @@ async def on_message(message: cl.Message):
     # Input for the graph
     input_messages = history + [HumanMessage(content=message.content)]
     
+    # Retrieve the telemetry handler if it exists
+    langfuse_handler = cl.user_session.get("langfuse_handler")
+    
+    # Create the config for the run
+    run_config = {}
+    if langfuse_handler:
+        run_config["callbacks"] = [langfuse_handler]
+
     # 2. Dynamic Event Loop
     async for event in agent.astream_events(
         {"messages": input_messages}, 
+        config=run_config,
         version="v2"
     ):
         kind = event["event"]
