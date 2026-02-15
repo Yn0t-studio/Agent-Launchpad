@@ -49,7 +49,14 @@ Use the Reasoning Engine's plan to craft your response.
 You MUST provide a response to the user. Do not be silent.
 Do not repeat the "Thinking Process" explicitly. just answer the user directly.""")
         
-        response = await model.ainvoke([system_prompt] + messages)
+        # DEBUG: Print messages
+        full_inputs = [system_prompt] + messages
+        print(f"DEBUG: Responder Inputs: {len(full_inputs)} messages")
+        for m in full_inputs:
+             print(f" - {m.type}: {m.content[:50]}...")
+
+        response = await model.ainvoke(full_inputs)
+        print(f"DEBUG: Responder Output: {response.content}")
         return {"messages": [response]}
 
     # Build the Graph

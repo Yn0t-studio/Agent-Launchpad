@@ -54,15 +54,15 @@ async def on_message(message: cl.Message):
             # Get metadata to know which node is speaking
             node_name = event.get("metadata", {}).get("langgraph_node", "unknown")
             content = event["data"]["chunk"].content
-            
-            # Skip empty content (keep-alives)
-            if not content:
-                continue
+
+            # DEBUG LOGGING (Re-enabled)
+            # print(f"DEBUG: Event: {kind} | Node: {node_name} | Content: {content!r}")
 
             # Route content based on the node
             if node_name == "reasoner":
-                # Stream to the thinking step
-                await thinking_step.stream_token(content)
+                if content:
+                    # Stream to the thinking step
+                    await thinking_step.stream_token(content)
                 
             elif node_name == "responder":
                 # This is the final answer
@@ -72,7 +72,14 @@ async def on_message(message: cl.Message):
                     final_answer = cl.Message(content="")
                     await final_answer.send()
                 
-                await final_answer.stream_token(content)
+                if content:
+                    await final_answer.stream_token(content)
+        
+        elif kind == "on_chat_model_end":
+            node_name = event.get("metadata", {}).get("langgraph_node", "unknown")
+            if node_name == "responder":
+                output = event["data"]["output"]
+                print(f"DEBUG: Responder END: {output.content if output else 'None'}")
 
     # 4. Cleanup
     # Close the thinking step if it hasn't been closed (e.g. if no answer was generated)
